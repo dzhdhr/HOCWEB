@@ -1,0 +1,26 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block content %}
+    <h1>T</h1>
+    <table class="table">
+    <tbody>
+        {% for t in T %}
+            <tr>
+            {% for foo in t %}
+                <td>{{ foo }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    <h1>P</h1>
+    <table class="table">
+    <tbody>
+    <tr>
+        {% for foo in p %}
+            <td>{{ foo }}</td>
+        {% endfor %}
+    </tr>
+    </tbody>
+    </table>
+{% endblock %}
