@@ -1,6 +1,6 @@
 
 import time
-from app.util import *
+from App.util import *
 
 
 def distCosine(x, y):

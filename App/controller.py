@@ -6,10 +6,10 @@ from flask import Blueprint, jsonify, render_template, request, flash
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-from app.hoc import get_T_P_global
-from app.util import set_device, set_model_pre, init_feature_set, build_T, build_dataset_informal
+from App.hoc import get_T_P_global
+from App.util import set_device, set_model_pre, init_feature_set, build_T, build_dataset_informal
 
-from app.numpy_dataloader import NumpyLoader
+from App.numpy_dataloader import NumpyLoader
 
 hoc_controller = Blueprint('hoc', __name__)
 

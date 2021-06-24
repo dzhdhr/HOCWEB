@@ -3,7 +3,7 @@ import gzip
 import numpy as np
 import torch
 import random
-import app.resnet_image as res_image
+import App.resnet_image as res_image
 import torch.nn as nn
 
 smp = torch.nn.Softmax(dim=0)

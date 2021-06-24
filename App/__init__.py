@@ -1,8 +1,8 @@
 from flask import Flask
 
-from app.controller import init_blueprint
-from app.ext import init_ext
-from app.setting import envs
+from App.controller import init_blueprint
+from App.ext import init_ext
+from App.setting import envs
 
 '''
 Create flask app and calling all the initialization function
