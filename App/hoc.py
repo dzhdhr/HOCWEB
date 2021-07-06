@@ -1,4 +1,3 @@
-
 import time
 from App.util import *
 
@@ -40,6 +39,7 @@ def count_y(KINDS, feat_cord, label, cluster_sum):
 
     return cnt
 
+
 def func(KINDS, p_estimate, T_out, P_out, N, step, LOCAL, _device):
     eps = 1e-2
     eps2 = 1e-8
@@ -66,7 +66,8 @@ def func(KINDS, p_estimate, T_out, P_out, N, step, LOCAL, _device):
 
     return loss
 
-def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None, lr=0.1):
+
+def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, p0=None, lr=0.1):
     # init
     # _device =  torch.device("cpu")
     N = KINDS
@@ -109,14 +110,20 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None,
             P_rec = P.detach()
         if step % 100 == 0:
             print('loss {}'.format(loss))
+            logger.write('loss {}\n'.format(loss))
             print(f'step: {step}  time_cost: {time.time() - time1}')
+            logger.write(f'step: {step}  time_cost: {time.time() - time1}\n')
             print(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}', flush=True)
+            logger.write(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}\n')
             print(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}', flush=True)
+            logger.write(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}\n')
+            logger.flush()
             time1 = time.time()
 
     return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach()
 
-def get_T_P_global(config, sub_noisy_dataset_name, max_step=501, T0=None, p0=None, lr=0.1):
+
+def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None, p0=None, lr=0.1, ):
     global GLOBAL_T_REAL
     # all_point_cnt = 10000
     all_point_cnt = 15000
@@ -126,6 +133,8 @@ def get_T_P_global(config, sub_noisy_dataset_name, max_step=501, T0=None, p0=Non
     # TODO: make the above parameters configurable
 
     print(f'Estimating global T. Sampling {all_point_cnt} examples each time')
+
+    logger.write(f'Estimating global T. Sampling {all_point_cnt} examples each time\n')
 
     KINDS = config['num_classes']
     data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
@@ -139,9 +148,10 @@ def get_T_P_global(config, sub_noisy_dataset_name, max_step=501, T0=None, p0=Non
     p_estimate[1] = torch.zeros(KINDS, KINDS)
     p_estimate[2] = torch.zeros(KINDS, KINDS, KINDS)
     p_estimate_rec = torch.zeros(NumTest, 3)
+    logger.flush()
     for idx in range(NumTest):
         print(idx, flush=True)
-
+        logger.write(str(idx)+"\n")
         # global
         sample = np.random.choice(range(data_set['feature'].shape[0]), all_point_cnt, replace=False)
         final_feat = data_set['feature'][sample]
@@ -154,11 +164,13 @@ def get_T_P_global(config, sub_noisy_dataset_name, max_step=501, T0=None, p0=Non
             p_estimate_rec[idx, i] = torch.mean(torch.abs(p_estimate[i] / (idx + 1) - p_real[i])) * 100.0 / (
                 torch.mean(p_real[i]))  # Assess the gap between estimation value and real value
         print(p_estimate_rec[idx], flush=True)
+        logger.writelines(str(p_estimate_rec[idx])+"\n")
 
+        logger.flush()
     for j in range(3):
         p_estimate[j] = p_estimate[j] / NumTest
 
-    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'], max_step, T0, p0, lr=lr)
+    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'],logger, max_step, T0, p0, lr=lr)
     P_calc = P_calc.view(-1).cpu().numpy()
     E_calc = E_calc.cpu().numpy()
     T_init = T_init.cpu().numpy()
@@ -170,10 +182,12 @@ def get_T_P_global(config, sub_noisy_dataset_name, max_step=501, T0=None, p0=Non
     # print(f"sum p = {np.sum(P_calc)}, \nsum T_est = \n{np.sum(E_calc, 1)}")
     # print("\n---Error of the estimated T (sum|T_est - T|/N * 100)----", flush=True)
     print(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}")
+    logger.write(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}\n")
     T_err = np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100
     rec_global = [[] for _ in range(3)]
     rec_global[0], rec_global[1], rec_global[2] = loss_min, T_real, E_calc
     path = "./rec_global/" + config['dataset'] + "_" + config['label_file_path'][11:14] + "_" + config[
         'pre_type'] + ".pt"
     # torch.save(rec_global, path)
+    logger.flush()
     return E_calc, P_calc, T_init, T_err

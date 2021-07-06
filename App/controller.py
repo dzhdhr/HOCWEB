@@ -49,10 +49,23 @@ def index_page():
         config['T'] = build_T(config['num_classes'])
         model_pre = set_model_pre(config)
         # flash('start Calculating, please wait')
+        logger = open("./log/test", 'w')
+        logger.write("Extracting Feature\n")
+        logger.flush()
         config['path'], record, cluster = init_feature_set(config, model_pre, train_dataloader_EF, -1)
         sub_clean_dataset_name, sub_noisy_dataset_name = build_dataset_informal(config, record, cluster)
-        T_est, P_est, T_init, T_err = get_T_P_global(config, sub_noisy_dataset_name, 1501, None, None, lr=0.1)
+
+
+        T_est, P_est, T_init, T_err = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
         T_final = T_est.tolist()
         return render_template('result.html', T=T_final, p=P_est.tolist())
     else:
         return render_template('index.html')
+
+
+@hoc_controller.route("/getlog")
+def get_log():
+    f = open("./log/test")
+    log = f.read()
+    f.close()
+    return log
