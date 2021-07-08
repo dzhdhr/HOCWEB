@@ -58,6 +58,9 @@ def index_page():
 
         T_est, P_est, T_init, T_err = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
         T_final = T_est.tolist()
+        logger.seek(0)
+        logger.truncate()
+        logger.close()
         return render_template('result.html', T=T_final, p=P_est.tolist())
     else:
         return render_template('index.html')
