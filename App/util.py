@@ -3,8 +3,10 @@ import gzip
 import numpy as np
 import torch
 import random
-import App.resnet_image as res_image
+
 import torch.nn as nn
+
+from app.clip import clip
 
 smp = torch.nn.Softmax(dim=0)
 smt = torch.nn.Softmax(dim=1)
@@ -29,16 +31,10 @@ def set_device():
 
 def set_model_pre(config):
     # use resnet50 for ImageNet pretrain (PyTorch official pre-trained model)
-    if config['pre_type'] == 'image':
-        model = res_image.resnet50(pretrained=True)
-    else:
-        RuntimeError('Undefined pretrained model.')
-    for param in model.parameters():
-        param.requires_grad = False
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, config['num_classes'])
-    model.to(config['device'])
-    return model
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, preprocess = clip.load('ViT-B/32', config['device'])  # RN50, RN101, RN50x4, ViT-B/32
+    return model, preprocess
+
 
 
 def init_feature_set(config, model_pre, train_dataloader, rnd):
@@ -47,13 +43,24 @@ def init_feature_set(config, model_pre, train_dataloader, rnd):
     model_pre.eval()
     record = [[] for _ in range(config['num_classes'])]
 
-    for i_batch, (feature, label, index) in enumerate(train_dataloader):
-        feature = feature.to(config['device'])
-        label = label.to(config['device'])
-        extracted_feature, _ = model_pre(feature)
-        for i in range(extracted_feature.shape[0]):
-            record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
+    # for i_batch, (feature, label, index) in enumerate(train_dataloader):
+    #     feature = feature.to(config['device'])
+    #     label = label.to(config['device'])
+    #     extracted_feature, _ = model_pre(feature)
+    #     for i in range(extracted_feature.shape[0]):
+    #         record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
+    for epoch in range(config['num_epoch']):
+        print(f'Epoch {epoch}')
+        record = [[] for _ in range(config['num_classes'])]
+        for i_batch, (feature, label, index) in enumerate(train_dataloader):
+            feature = feature.to(config['device'])
+            label = label.to(config['device'])
 
+            extracted_feature = model_pre.encode_image(feature)  # CLIP
+            for i in range(extracted_feature.shape[0]):
+                record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
+
+        # iterate_detection(config, record, train_dataset)
     path = f'./data/{config["pre_type"]}_{config["label_file_path"][7:-3]}.pt'
     return path, record, c1m_cluster_each
 

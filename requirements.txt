@@ -9,3 +9,4 @@ flask-cors
 Flask_Script==2.0.6
 flask_bootstrap
 Werkzeug~=2.0.1
+tqdm
