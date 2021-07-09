@@ -6,7 +6,7 @@ import random
 
 import torch.nn as nn
 
-from app.clip import clip
+from App.clip import clip
 
 smp = torch.nn.Softmax(dim=0)
 smt = torch.nn.Softmax(dim=1)
@@ -32,14 +32,14 @@ def set_device():
 def set_model_pre(config):
     # use resnet50 for ImageNet pretrain (PyTorch official pre-trained model)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, preprocess = clip.load('ViT-B/32', config['device'])  # RN50, RN101, RN50x4, ViT-B/32
+    model, preprocess = clip.load('ViT-B/32', device)  # RN50, RN101, RN50x4, ViT-B/32
     return model, preprocess
 
 
 
 def init_feature_set(config, model_pre, train_dataloader, rnd):
     c1m_cluster_each = [0 for _ in range(config['num_classes'])]
-    # save the 512-dim feature as a dataset
+
     model_pre.eval()
     record = [[] for _ in range(config['num_classes'])]
 
@@ -51,8 +51,9 @@ def init_feature_set(config, model_pre, train_dataloader, rnd):
     #         record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
     for epoch in range(config['num_epoch']):
         print(f'Epoch {epoch}')
-        record = [[] for _ in range(config['num_classes'])]
+        # record = [[] for _ in range(config['num_classes'])]
         for i_batch, (feature, label, index) in enumerate(train_dataloader):
+            print(i_batch)
             feature = feature.to(config['device'])
             label = label.to(config['device'])
 

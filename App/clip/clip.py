@@ -6,7 +6,7 @@ from typing import Union, List
 
 import torch
 from PIL import Image
-from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
+from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize, Lambda
 from tqdm import tqdm
 
 from .model import build_model
@@ -55,11 +55,14 @@ def _download(url: str, root: str = os.path.expanduser("~/.cache/clip")):
     return download_target
 
 
+def _convert_RGB(image):
+    return image.convert("RGB")
+
 def _transform(n_px):
     return Compose([
         Resize(n_px, interpolation=Image.BICUBIC),
         CenterCrop(n_px),
-        lambda image: image.convert("RGB"),
+        Lambda(_convert_RGB),
         ToTensor(),
         Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
     ])

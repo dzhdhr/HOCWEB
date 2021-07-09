@@ -1,5 +1,5 @@
 numpy
-torch
+torch==1.7.1
 Pillow~=8.2.0
 torchvision~=0.9.1
 Flask==1.1.2
@@ -10,3 +10,5 @@ Flask_Script==2.0.6
 flask_bootstrap
 Werkzeug~=2.0.1
 tqdm
+ftfy
+regex
