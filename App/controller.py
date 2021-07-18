@@ -64,8 +64,8 @@ def index_page():
         logger.flush()
 
         T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
-        T_est = np.around(T_est*100, decimals = 1)
-        P_est = np.around(P_est*100, decimals = 1)
+        T_est = np.round(T_est*100, decimals = 1)
+        P_est = np.round(P_est*100, decimals = 1)
         print(T_est)
         print(P_est)
         T_final = T_est.tolist()
@@ -73,7 +73,7 @@ def index_page():
         logger.truncate()
         logger.close()
         torch.cuda.empty_cache()
-        return render_template('result.html', T=T_final, p=P_est.tolist())
+        return render_template('result.html', T=T_est, p=P_est)
     else:
         return render_template('index.html')
 

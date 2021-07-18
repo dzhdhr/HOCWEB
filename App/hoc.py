@@ -136,20 +136,20 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     print(f'Estimating global T. Sampling {all_point_cnt} examples each time')
 
     logger.write(f'Estimating high-order consensuses (numerically). Sampling {all_point_cnt} examples each time\n')
-
+    logger.flush()
 
     # Build Feature Clusters --------------------------------------
     p_estimate = [[] for _ in range(3)]
     p_estimate[0] = torch.zeros(KINDS)
     p_estimate[1] = torch.zeros(KINDS, KINDS)
     p_estimate[2] = torch.zeros(KINDS, KINDS, KINDS)
-    p_estimate_rec = torch.zeros(NumTest, 3)
-    logger.flush()
+
 
 
     for idx in range(NumTest):
         print(idx, flush=True)
         logger.write(f"{idx+1}/{NumTest}\n")
+        logger.flush()
         # global
         sample = np.random.choice(range(data_set['feature'].shape[0]), all_point_cnt, replace=False)
         final_feat = data_set['feature'][sample]
@@ -164,8 +164,8 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
         # print(p_estimate_rec[idx], flush=True)
         # logger.writelines(str(p_estimate_rec[idx])+"\n")
 
-        logger.flush()
     logger.write(f'Estimating high-order consensuses (numerically) --- Done\n')
+    logger.flush()
     logger.write(f'\n')
     logger.write(f'Solving equations:\n')
 
