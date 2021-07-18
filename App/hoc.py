@@ -125,8 +125,13 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, 
 
 def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None, p0=None, lr=0.1, ):
     global GLOBAL_T_REAL
+    KINDS = config['num_classes']
+    data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
+    T_real, P_real = check_T_torch(KINDS, data_set['clean_label'], data_set['noisy_label'])
+    GLOBAL_T_REAL = T_real
+    p_real = count_real(KINDS, torch.tensor(T_real), torch.tensor(P_real), -1)
     # all_point_cnt = 10000
-    all_point_cnt = 15000
+    all_point_cnt = 15000 if data_set['feature'].shape[0]>10000 else data_set['feature'].shape[0]
     # all_point_cnt = 2000
     NumTest = int(50)
     # NumTest = int(20)
@@ -136,13 +141,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
 
     logger.write(f'Estimating global T. Sampling {all_point_cnt} examples each time\n')
 
-    KINDS = config['num_classes']
-    data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
-    T_real, P_real = check_T_torch(KINDS, data_set['clean_label'], data_set['noisy_label'])
-    GLOBAL_T_REAL = T_real
-    p_real = count_real(KINDS, torch.tensor(T_real), torch.tensor(P_real), -1)
-
-    # Build Feature Clusters --------------------------------------
+    # Build FeatureClusters --------------------------------------
     p_estimate = [[] for _ in range(3)]
     p_estimate[0] = torch.zeros(KINDS)
     p_estimate[1] = torch.zeros(KINDS, KINDS)

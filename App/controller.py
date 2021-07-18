@@ -63,6 +63,7 @@ def index_page():
         logger.seek(0)
         logger.truncate()
         logger.close()
+        torch.cuda.empty_cache()
         return render_template('result.html', T=T_final, p=P_est.tolist())
     else:
         return render_template('index.html')
