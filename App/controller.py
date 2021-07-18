@@ -64,11 +64,8 @@ def index_page():
         logger.flush()
 
         T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
-        T_est = np.round(T_est*100, decimals = 1)
-        P_est = np.round(P_est*100, decimals = 1)
-        print(T_est)
-        print(P_est)
-        T_final = T_est.tolist()
+        T_est = np.round(T_est, decimals = 4)
+        P_est = np.round(P_est, decimals = 4)
         logger.seek(0)
         logger.truncate()
         logger.close()
