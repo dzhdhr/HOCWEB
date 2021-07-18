@@ -58,7 +58,7 @@ def index_page():
         sub_clean_dataset_name, sub_noisy_dataset_name = build_dataset_informal(config, record, cluster)
 
 
-        T_est, P_est, T_init, T_err = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
+        T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
         T_final = T_est.tolist()
         logger.seek(0)
         logger.truncate()

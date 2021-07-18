@@ -127,13 +127,9 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     global GLOBAL_T_REAL
     KINDS = config['num_classes']
     data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
-    T_real, P_real = check_T_torch(KINDS, data_set['clean_label'], data_set['noisy_label'])
-    GLOBAL_T_REAL = T_real
-    p_real = count_real(KINDS, torch.tensor(T_real), torch.tensor(P_real), -1)
-    # all_point_cnt = 10000
-    all_point_cnt = 15000 if data_set['feature'].shape[0]>10000 else data_set['feature'].shape[0]
+    all_point_cnt = 15000 if data_set['feature'].shape[0]>15000 else data_set['feature'].shape[0]
     # all_point_cnt = 2000
-    NumTest = int(50)
+    NumTest = int(50) if all_point_cnt > 15000 else 1
     # NumTest = int(20)
     # TODO: make the above parameters configurable
 
@@ -141,7 +137,8 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
 
     logger.write(f'Estimating global T. Sampling {all_point_cnt} examples each time\n')
 
-    # Build FeatureClusters --------------------------------------
+
+    # Build Feature Clusters --------------------------------------
     p_estimate = [[] for _ in range(3)]
     p_estimate[0] = torch.zeros(KINDS)
     p_estimate[1] = torch.zeros(KINDS, KINDS)
@@ -159,11 +156,11 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
         for i in range(3):
             cnt_y_3[i] /= all_point_cnt
             p_estimate[i] = p_estimate[i] + cnt_y_3[i] if idx != 0 else cnt_y_3[i]
-            ss = torch.abs(p_estimate[i] / (idx + 1) - p_real[i])
-            p_estimate_rec[idx, i] = torch.mean(torch.abs(p_estimate[i] / (idx + 1) - p_real[i])) * 100.0 / (
-                torch.mean(p_real[i]))  # Assess the gap between estimation value and real value
-        print(p_estimate_rec[idx], flush=True)
-        logger.writelines(str(p_estimate_rec[idx])+"\n")
+            # ss = torch.abs(p_estimate[i] / (idx + 1) - p_real[i])
+            # p_estimate_rec[idx, i] = torch.mean(torch.abs(p_estimate[i] / (idx + 1) - p_real[i])) * 100.0 / (
+            #     torch.mean(p_real[i]))  # Assess the gap between estimation value and real value
+        # print(p_estimate_rec[idx], flush=True)
+        # logger.writelines(str(p_estimate_rec[idx])+"\n")
 
         logger.flush()
     for j in range(3):
@@ -180,13 +177,13 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     # print(f"loss = {loss_min}, \np = {P_calc}, \nT_est = \n{np.round(E_calc, 3)}")
     # print(f"sum p = {np.sum(P_calc)}, \nsum T_est = \n{np.sum(E_calc, 1)}")
     # print("\n---Error of the estimated T (sum|T_est - T|/N * 100)----", flush=True)
-    print(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}")
-    logger.write(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}\n")
-    T_err = np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100
-    rec_global = [[] for _ in range(3)]
-    rec_global[0], rec_global[1], rec_global[2] = loss_min, T_real, E_calc
-    path = "./rec_global/" + config['dataset'] + "_" + config['label_file_path'][11:14] + "_" + config[
-        'pre_type'] + ".pt"
+    # print(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}")
+    # logger.write(f"L11 Error (Global): {np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100}\n")
+    # T_err = np.sum(np.abs(E_calc - np.array(T_real))) * 1.0 / KINDS * 100
+    # rec_global = [[] for _ in range(3)]
+    # rec_global[0], rec_global[1], rec_global[2] = loss_min, T_real, E_calc
+    # path = "./rec_global/" + config['dataset'] + "_" + config['label_file_path'][11:14] + "_" + config[
+    #     'pre_type'] + ".pt"
     # torch.save(rec_global, path)
     logger.flush()
-    return E_calc, P_calc, T_init, T_err
+    return E_calc, P_calc, T_init
