@@ -127,9 +127,13 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     global GLOBAL_T_REAL
     KINDS = config['num_classes']
     data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
-    all_point_cnt = 15000 if data_set['feature'].shape[0]>15000 else data_set['feature'].shape[0]
+    
+    # all_point_cnt = 5000
+    
+    all_point_cnt = 5000 if data_set['feature'].shape[0]>5000 else data_set['feature'].shape[0]
     # all_point_cnt = 2000
-    NumTest = int(50) if all_point_cnt > 15000 else 1
+
+    NumTest = int(max(20,data_set['feature'].shape[0]//5000)) if all_point_cnt > 5000 else 1
     # NumTest = int(20)
     # TODO: make the above parameters configurable
 
