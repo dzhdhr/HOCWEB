@@ -149,7 +149,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
 
     for idx in range(NumTest):
         print(idx, flush=True)
-        logger.write(f"{idx}/{NumTest}\n")
+        logger.write(f"{idx+1}/{NumTest}\n")
         # global
         sample = np.random.choice(range(data_set['feature'].shape[0]), all_point_cnt, replace=False)
         final_feat = data_set['feature'][sample]
@@ -176,8 +176,8 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     P_calc = P_calc.view(-1).cpu().numpy()
     E_calc = E_calc.cpu().numpy()
     T_init = T_init.cpu().numpy()
-    E_calc = np.round(E_calc,4)
-    P_calc = np.round(P_calc,4)
+    E_calc = np.around(E_calc, decimals = 4)
+    P_calc = np.around(P_calc, decimals = 4)
     
 
     # print("----Real value----------")
