@@ -133,7 +133,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     all_point_cnt = 5000 if data_set['feature'].shape[0]>5000 else data_set['feature'].shape[0]
     # all_point_cnt = 2000
 
-    NumTest = int(max(20,data_set['feature'].shape[0]//5000)) if all_point_cnt > 5000 else 1
+    NumTest = int(max(20,data_set['feature'].shape[0]//5000)) if all_point_cnt == 5000 else 1
     # NumTest = int(20)
     # TODO: make the above parameters configurable
 
