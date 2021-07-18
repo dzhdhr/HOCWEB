@@ -176,8 +176,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     P_calc = P_calc.view(-1).cpu().numpy()
     E_calc = E_calc.cpu().numpy()
     T_init = T_init.cpu().numpy()
-    E_calc = np.around(E_calc, decimals = 4)
-    P_calc = np.around(P_calc, decimals = 4)
+
     
 
     # print("----Real value----------")
