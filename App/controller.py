@@ -56,7 +56,10 @@ def index_page():
         logger.flush()
         config['path'], record, cluster = init_feature_set(config, model_pre, train_dataloader_EF, -1)
         sub_clean_dataset_name, sub_noisy_dataset_name = build_dataset_informal(config, record, cluster)
-
+        logger.write("Extracting Feature --- Done\n")
+        logger.write("\n")
+        logger.write("Estimating noise transition matrix T and clean prior p using HOC Global\n")
+        logger.flush()
 
         T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
         T_final = T_est.tolist()
