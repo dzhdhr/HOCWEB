@@ -13,6 +13,8 @@ from App.numpy_dataloader import NumpyLoader
 
 import numpy as np
 
+from torchvision.transforms import transforms
+
 hoc_controller = Blueprint('hoc', __name__)
 
 
@@ -43,6 +45,8 @@ def index_page():
         }
 
         model_pre, pre_process = set_model_pre(config)
+        if use_clip == False:
+            pre_process = transforms.ToTensor()
         train = NumpyLoader(label_path=label_file_name, feature_path=feature_file_name, pre_process=pre_process)
         config['num_classes'] = train.unique_class()
         config['P'] = [1.0 / config['num_classes']] * config['num_classes']  # Distribution of 10 clusters
