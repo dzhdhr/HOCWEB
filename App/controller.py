@@ -25,7 +25,7 @@ def init_blueprint(app):
 @hoc_controller.route("/", methods=['GET', 'POST'])
 def index_page():
     if request.method == 'POST':
-        use_clip = True
+        use_clip = request.form.get('use_clip') == 'on'
         step = 1500 if not request.form.get('step') else int(request.form.get('step'))+1
         feature_file = request.files['feature-file']
         label_file = request.files['label-file']
