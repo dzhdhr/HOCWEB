@@ -2,6 +2,7 @@
 
 {% block content %}
     <h1>T</h1>
+    <div style="padding: 20px">
     <table class="table">
     <tbody>
         {% for t in T %}
@@ -13,7 +14,9 @@
         {% endfor %}
     </tbody>
     </table>
+    </div>
     <h1>P</h1>
+    <div style="padding: 20px">
     <table class="table">
     <tbody>
     <tr>
@@ -23,4 +26,57 @@
     </tr>
     </tbody>
     </table>
+    <button id = 'download_T' type="button" class="btn btn-success">Download T</button>
+    <button id = 'download_P' type="button" class="btn btn-success">Download p</button>
+    </div>
+    
+    
+    <script type="text/javascript">
+        $('#download_T').on('click',function () {
+            let url = "/getresult/T"
+            let xhr = new XMLHttpRequest()
+            xhr.open('GET',url,true)
+            xhr.responseType = 'blob'
+            xhr.onload = function () {
+                if (this.status===200){
+                    var blob = this.response;
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = function (e) {
+                        var a = document.createElement('a');
+                        a.download = 'T_est.npy';
+                        a.href = e.target.result;
+                        $("body").append(a);
+                        a.click();
+                        $(a).remove();
+                }
+            }
+        }
+        xhr.send()
+        })
+
+        $('#download_P').on('click',function (){
+            let url = "/getresult/p"
+            let xhr = new XMLHttpRequest()
+            xhr.open('GET',url,true)
+            xhr.responseType = 'blob'
+            xhr.onload = function () {
+                if (this.status===200){
+                    var blob = this.response;
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = function (e) {
+                        var a = document.createElement('a');
+                        a.download = 'p_est.npy';
+                        a.href = e.target.result;
+                        $("body").append(a);
+                        a.click();
+                        $(a).remove();
+                }
+            }
+        }
+        xhr.send()
+        })
+    
+    </script>
 {% endblock %}

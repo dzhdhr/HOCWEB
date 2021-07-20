@@ -1,7 +1,7 @@
 import os
 
 import torch
-from flask import Blueprint, jsonify, render_template, request, flash
+from flask import Blueprint, jsonify, render_template, request, flash, make_response, send_from_directory
 
 from flask import current_app
 from werkzeug.utils import secure_filename
@@ -70,6 +70,8 @@ def index_page():
         logger.truncate()
         logger.close()
         torch.cuda.empty_cache()
+        np.save('./result/T.npy',T_est)
+        np.save('./result/p.npy',P_est)
         return render_template('result.html', T=T_est, p=P_est)
     else:
         return render_template('index.html')
@@ -81,3 +83,12 @@ def get_log():
     log = f.read()
     f.close()
     return log
+
+
+@hoc_controller.route("/getresult/<string:filename>")
+def get_result(filename):
+    path = os.path.join(os.getcwd(),current_app.config['RESULT_FOLDER'])
+    # print(path)
+    name = filename + ".npy"
+    response = make_response(send_from_directory(path, name, as_attachment=True))
+    return response
