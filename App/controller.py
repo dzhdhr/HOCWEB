@@ -13,6 +13,8 @@ from App.numpy_dataloader import NumpyLoader
 
 import numpy as np
 
+from torchvision.transforms import transforms
+
 hoc_controller = Blueprint('hoc', __name__)
 
 
@@ -23,6 +25,8 @@ def init_blueprint(app):
 @hoc_controller.route("/", methods=['GET', 'POST'])
 def index_page():
     if request.method == 'POST':
+        use_clip = request.form.get('use_clip') == 'on'
+        step = 1500 if not request.form.get('step') else int(request.form.get('step'))+1
         feature_file = request.files['feature-file']
         label_file = request.files['label-file']
 
@@ -32,44 +36,49 @@ def index_page():
         feature_file_name = os.path.join(current_app.config['UPLOAD_FOLDER'], secure_filename(feature_file.filename))
         feature_file.save(feature_file_name)
 
-
-
         config = {
             'pre_type': "image",
             "device": set_device(),
             "dataset": "CIFAR10",
             "label_file_path": "",
-            "num_epoch":1
+            "num_epoch": 1
         }
+
         model_pre, pre_process = set_model_pre(config)
+        if use_clip == False:
+            pre_process = transforms.ToTensor()
         train = NumpyLoader(label_path=label_file_name, feature_path=feature_file_name, pre_process=pre_process)
         config['num_classes'] = train.unique_class()
         config['P'] = [1.0 / config['num_classes']] * config['num_classes']  # Distribution of 10 clusters
         config['T'] = build_T(config['num_classes'])
 
         train_dataloader_EF = torch.utils.data.DataLoader(train,
-                                                          batch_size=128,
+                                                          batch_size=64,
                                                           shuffle=True,
                                                           num_workers=2,
                                                           drop_last=False)
-        # flash('start Calculating, please wait')
+
         logger = open("./log/test", 'w')
         logger.write("Extracting Feature\n")
         logger.flush()
-        config['path'], record, cluster = init_feature_set(config, model_pre, train_dataloader_EF, -1)
+        config['path'], record, cluster = init_feature_set(config, model_pre, train_dataloader_EF, -1,use_clip)
+
         sub_clean_dataset_name, sub_noisy_dataset_name = build_dataset_informal(config, record, cluster)
         logger.write("Extracting Feature --- Done\n")
         logger.write("\n")
         logger.write("Estimating noise transition matrix T and clean prior p using HOC Global\n")
         logger.flush()
 
-        T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name,logger, 1501, None, None, lr=0.1)
-        T_est = np.round(T_est, decimals = 4)
-        P_est = np.round(P_est, decimals = 4)
+        T_est, P_est, T_init = get_T_P_global(config, sub_noisy_dataset_name, logger, step, None, None, lr=0.1)
+        T_est = np.round(T_est, decimals=4)
+        P_est = np.round(P_est, decimals=4)
+
         logger.seek(0)
         logger.truncate()
         logger.close()
+
         torch.cuda.empty_cache()
+
         np.savetxt("./result/T.csv", T_est, delimiter=",")
         np.savetxt('./result/p.csv', P_est, delimiter=',')
         return render_template('result.html', T=T_est, p=P_est)
@@ -87,9 +96,7 @@ def get_log():
 
 @hoc_controller.route("/getresult/<string:filename>")
 def get_result(filename):
-    path = os.path.join(os.getcwd(),current_app.config['RESULT_FOLDER'])
-    # print(path)
+    path = os.path.join(os.getcwd(), current_app.config['RESULT_FOLDER'])
     name = filename + ".csv"
-    # print(name)
     response = make_response(send_from_directory(path, name, as_attachment=True))
     return response
