@@ -70,8 +70,8 @@ def index_page():
         logger.truncate()
         logger.close()
         torch.cuda.empty_cache()
-        np.save('./result/T.npy',T_est)
-        np.save('./result/p.npy',P_est)
+        np.savetxt("./result/T.csv", T_est, delimiter=",")
+        np.savetxt('./result/p.csv', P_est, delimiter=',')
         return render_template('result.html', T=T_est, p=P_est)
     else:
         return render_template('index.html')
@@ -89,6 +89,7 @@ def get_log():
 def get_result(filename):
     path = os.path.join(os.getcwd(),current_app.config['RESULT_FOLDER'])
     # print(path)
-    name = filename + ".npy"
+    name = filename + ".csv"
+    # print(name)
     response = make_response(send_from_directory(path, name, as_attachment=True))
     return response

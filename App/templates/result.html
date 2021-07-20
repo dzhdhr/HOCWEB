@@ -33,49 +33,28 @@
     
     <script type="text/javascript">
         $('#download_T').on('click',function () {
-            let url = "/getresult/T"
-            let xhr = new XMLHttpRequest()
-            xhr.open('GET',url,true)
-            xhr.responseType = 'blob'
-            xhr.onload = function () {
-                if (this.status===200){
-                    var blob = this.response;
-                    var reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onload = function (e) {
-                        var a = document.createElement('a');
-                        a.download = 'T_est.npy';
-                        a.href = e.target.result;
-                        $("body").append(a);
-                        a.click();
-                        $(a).remove();
-                }
-            }
-        }
-        xhr.send()
+            fetch('/getresult/T').then(res => res.blob().then(blob => {
+                var a = document.createElement('a');
+                console.log(blob)
+                var url = window.URL.createObjectURL(blob);
+                var filename = 'T.csv';
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }))
         })
-
-        $('#download_P').on('click',function (){
-            let url = "/getresult/p"
-            let xhr = new XMLHttpRequest()
-            xhr.open('GET',url,true)
-            xhr.responseType = 'blob'
-            xhr.onload = function () {
-                if (this.status===200){
-                    var blob = this.response;
-                    var reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onload = function (e) {
-                        var a = document.createElement('a');
-                        a.download = 'p_est.npy';
-                        a.href = e.target.result;
-                        $("body").append(a);
-                        a.click();
-                        $(a).remove();
-                }
-            }
-        }
-        xhr.send()
+        $('#download_P').on('click',function () {
+             fetch('/getresult/p').then(res => res.blob().then(blob => {
+                var a = document.createElement('a');
+                console.log(blob)
+                var url = window.URL.createObjectURL(blob);
+                var filename = 'p.csv';
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }))
         })
     
     </script>
