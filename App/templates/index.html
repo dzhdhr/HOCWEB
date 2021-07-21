@@ -10,38 +10,6 @@
 
 
 {% block content %}
-    <div style="margin-left: 10px">
-        <p>Demo for ICML2021 [1]: Clusterability as an Alternative to Anchor Points When Learning with Noisy Labels</p>
-        <p>Designed by Zihao Dong @ UCSC</p>
-        <p>Feature file: *.npy. [Numpy array: (DataSize,  Shape of an Instance)] </p>
-        <p>Label file: *.npy. [Numpy array: (DataSize, )]</p>
-        <p>Use CLIP: Use CLIP [2] to extract representations or use raw feature</p>
-        <p>Step: Number of steps/iterations to solve consensus equations with SGD</p>
-
-
-        <p>Example</p>
-        <p>10,000 instances of CIFAR-10: feature.npy &rarr; (10000,32,32,3); label.npy &rarr; (10000,)</p>
-        <p>Use CLIP. Step = 500.</p>
-
-        <p>Current demo is only tested with CIFAR-10.</p>
-
-
-        <p>
-        [1] Zhu, Z., Song, Y. and Liu, Y., 2021. Clusterability as an alternative to anchor points when learning with noisy labels.
-        </p>
-        <p>
-        [2] Radford, A., Kim, J.W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J. and Krueger, G., 2021. Learning transferable visual models from natural language supervision.
-        </p>
-        <!-- <p>Please do not </p> -->
-        <!-- <p>You can use the mark tag to <mark>highlight</mark> text.</p> -->
-        <!-- <p><del>This line of text is meant to be treated as deleted text.</del></p>
-        <p><s>This line of text is meant to be treated as no longer accurate.</s></p>
-        <p><ins>This line of text is meant to be treated as an addition to the document.</ins></p>
-        <p><u>This line of text will render as underlined.</u></p>
-        <p><small>This line of text is meant to be treated as fine print.</small></p>
-        <p><strong>This line rendered as bold text.</strong></p>
-        <p><em>This line rendered as italicized text.</em></p> -->
-    </div>
 <form action="" method="post" enctype="multipart/form-data">
 
     <div style="display: flex;margin: 10px;flex-direction: column;justify-content: center">
@@ -124,5 +92,40 @@
         },2000)
     });
 </script>
+
+<div style="margin-left: 10px">
+    <!-- <p>ReadME</p> -->
+    <p>Demo for ICML2021 [1]: Clusterability as an Alternative to Anchor Points When Learning with Noisy Labels</p>
+    <p>Designed by Zihao Dong @ UCSC</p>
+    <p><strong>Feature file:</strong> *.npy. [Numpy array: (DataSize,  Shape of an Instance)] </p>
+    <p><strong>Label file:</strong> *.npy. [Numpy array: (DataSize, )]</p>
+    <p><strong>Use CLIP:</strong> Use CLIP [2] to extract representations or use raw feature</p>
+    <p><strong>Step:</strong>: Number of steps/iterations to solve consensus equations with SGD</p>
+
+
+    <p><strong>Example:</strong></p>
+    <p>10,000 instances of CIFAR-10: feature.npy &rarr; (10000,32,32,3); label.npy &rarr; (10000,)</p>
+    <p>Use CLIP. Step = 500.</p>
+
+    <p>Current demo is only tested with CIFAR-10.</p>
+
+
+    <p>
+    [1] Zhu, Z., Song, Y. and Liu, Y., 2021. Clusterability as an alternative to anchor points when learning with noisy labels.
+    </p>
+    <p>
+    [2] Radford, A., Kim, J.W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J. and Krueger, G., 2021. Learning transferable visual models from natural language supervision.
+    </p>
+    <!-- <p>Please do not </p> -->
+    <!-- <p>You can use the mark tag to <mark>highlight</mark> text.</p> -->
+    <!-- <p><del>This line of text is meant to be treated as deleted text.</del></p>
+    <p><s>This line of text is meant to be treated as no longer accurate.</s></p>
+    <p><ins>This line of text is meant to be treated as an addition to the document.</ins></p>
+    <p><u>This line of text will render as underlined.</u></p>
+    <p><small>This line of text is meant to be treated as fine print.</small></p>
+    <p><strong>This line rendered as bold text.</strong></p>
+    <p><em>This line rendered as italicized text.</em></p> -->
+</div>
+
 {% endblock %}
 
