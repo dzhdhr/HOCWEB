@@ -9,11 +9,12 @@ class NumpyLoader(dataset.Dataset):
     def __getitem__(self, index):
         img = self.imgs[index]
         label = self.label[index]
-        return self.pre_process(self.trans(img)), label, index
+        return self.pre_process(img), label, index
 
     def __init__(self, label_path, feature_path,pre_process):
         self.imgs = np.load(feature_path)
         self.label = np.load(label_path)
+        print(self.imgs.shape)
         self.pre_process = pre_process
         # self.imgs = self.pre_process(self.imgs)
         self.trans = transforms.Compose([
