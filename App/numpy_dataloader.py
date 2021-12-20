@@ -13,8 +13,10 @@ class NumpyLoader(dataset.Dataset):
 
     def __init__(self, label_path, feature_path,pre_process):
         self.imgs = np.load(feature_path)
-        self.label = np.load(label_path)
+        self.noise_or_not = None
+        self.label = np.int8(np.load(label_path))
         print(self.imgs.shape)
+        print(self.label.shape)
         self.pre_process = pre_process
         # self.imgs = self.pre_process(self.imgs)
         self.trans = transforms.Compose([

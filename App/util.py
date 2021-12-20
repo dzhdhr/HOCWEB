@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import random
 
-import torch.nn as nn
+import torch.nn.functional as F
 
 from App.clip import clip
 
@@ -18,6 +18,14 @@ def unzip(file_path):
     g_file = gzip.GzipFile(file_name)
     open(file_name, "wb+").write(g_file.read())
     g_file.close()
+
+
+def cosDistance(features):
+    # features: N*M matrix. N features, each features is M-dimension.
+    features = F.normalize(features, dim=1)  # each feature's l2-norm should be 1
+    similarity_matrix = torch.matmul(features, features.T)
+    distance_matrix = 1.0 - similarity_matrix
+    return distance_matrix
 
 
 def set_device():
@@ -37,7 +45,6 @@ def set_model_pre(config):
 
 
 def init_feature_set(config, model_pre, train_dataloader, rnd, use_clip=True):
-
     c1m_cluster_each = [0 for _ in range(config['num_classes'])]
 
     model_pre.eval()
@@ -59,7 +66,7 @@ def init_feature_set(config, model_pre, train_dataloader, rnd, use_clip=True):
                 extracted_feature = model_pre.encode_image(feature)
             else:
                 # extracted_feature = feature.flatten()
-                extracted_feature = feature.reshape(feature.shape[0],-1)
+                extracted_feature = feature.reshape(feature.shape[0], -1)
             for i in range(extracted_feature.shape[0]):
                 record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
 
@@ -166,3 +173,11 @@ def build_T(cluster):
                 T[i][j] = rand
         T[i][i] = 1 - rand_sum
     return T
+
+
+def check_file(path):
+    try:
+        result = np.load(path)
+        return result.shape
+    except ValueError:
+        return "File can't be Opened"

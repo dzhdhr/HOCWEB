@@ -8,8 +8,8 @@ class DevelopConfig(Config):
     UPLOAD_FOLDER = 'upload/'
     secret_key = 'super secret key'
     RESULT_FOLDER = 'result/'
-    DETECT_RESULT = 'detectreuslt/'
-    DETECT_LOG='detectlog/'
+    DETECT_RESULT = 'detectresult/'
+    DETECT_LOG = 'detectlog/'
 
 
 envs = {

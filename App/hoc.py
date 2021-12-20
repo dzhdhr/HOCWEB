@@ -1,6 +1,6 @@
 import time
 from App.util import *
-
+import torch.nn.functional as F
 
 def distCosine(x, y):
     """
@@ -200,3 +200,68 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     # torch.save(rec_global, path)
     logger.flush()
     return E_calc, P_calc, T_init
+
+def count_knn_distribution(args, feat_cord, label, cluster_sum, k, norm='l2'):
+    # feat_cord = torch.tensor(final_feat)
+    KINDS = args['num_classes']
+    dist = cosDistance(feat_cord)
+
+    print(f'knn parameter is k = {k}')
+    time1 = time.time()
+    min_similarity = args['min_similarity']
+    values, indices = dist.topk(k, dim=1, largest=False, sorted=True)
+    values[:, 0] = 2.0 * values[:, 1] - values[:, 2]
+    knn_labels = label[indices]
+
+    knn_labels_cnt = torch.zeros(cluster_sum, KINDS)
+
+    for i in range(KINDS):
+        knn_labels_cnt[:, i] += torch.sum((1.0 - min_similarity - values) * (knn_labels == i), 1)
+
+    time2 = time.time()
+    print(f'Running time for k = {k} is {time2 - time1}')
+
+    if norm == 'l2':
+        # normalized by l2-norm -- cosine distance
+        knn_labels_prob = F.normalize(knn_labels_cnt, p=2.0, dim=1)
+    elif norm == 'l1':
+        # normalized by mean
+        knn_labels_prob = knn_labels_cnt / torch.sum(knn_labels_cnt, 1).reshape(-1, 1)
+    else:
+        raise NameError('Undefined norm')
+    return knn_labels_prob
+
+def get_score(knn_labels_cnt, label, k, method='cores', prior=None):  # method = ['cores', 'peer']
+    # knn_labels_cnt: sampleSize * #class
+    # knn_labels_cnt /= (k*1.0)
+    # import pdb
+    # pdb.set_trace()
+    loss = F.nll_loss(torch.log(knn_labels_cnt + 1e-8), label, reduction='none')
+    # loss = -torch.tanh(-F.nll_loss(knn_labels_cnt, label, reduction = 'none')) # TV
+    # loss = -(-F.nll_loss(knn_labels_cnt, label, reduction = 'none')) #
+    # loss_numpy = loss.data.cpu().numpy()
+    # num_batch = len(loss_numpy)
+    # loss_v = np.zeros(num_batch)
+    # loss_div_numpy = float(np.array(0))
+
+    # loss_ = -(knn_labels_cnt)   #
+    # loss_ = -torch.tanh(knn_labels_cnt)   # TV
+    # import pdb
+    # pdb.set_trace()
+    loss_ = -torch.log(knn_labels_cnt + 1e-8)
+    if method == 'cores':
+        score = loss - torch.mean(loss_, 1)
+        # score =  loss
+    elif method == 'peer':
+        prior = torch.tensor(prior)
+        score = loss - torch.sum(torch.mul(prior, loss_), 1)
+    elif method == 'ce':
+        score = loss
+    elif method == 'avg':
+        score = - torch.mean(loss_, 1)
+    elif method == 'new':
+        score = 1.1 * loss - torch.mean(loss_, 1)
+    else:
+        raise NameError('Undefined method')
+
+    return score
