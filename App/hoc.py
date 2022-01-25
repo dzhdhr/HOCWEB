@@ -1,6 +1,9 @@
 import time
-from App.util import *
+
 import torch.nn.functional as F
+
+from App.util import *
+
 
 def distCosine(x, y):
     """
@@ -112,7 +115,7 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, 
             print('loss {}'.format(loss))
             logger.write('loss {}\n'.format(loss))
             print(f'step: {step}  time_cost: {time.time() - time1}')
-            logger.write(f'step: {step}/{max_step-1}  time_cost: {time.time() - time1}\n')
+            logger.write(f'step: {step}/{max_step - 1}  time_cost: {time.time() - time1}\n')
             print(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}', flush=True)
             logger.write(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}\n')
             print(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}', flush=True)
@@ -127,11 +130,11 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     global GLOBAL_T_REAL
     KINDS = config['num_classes']
     data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
-    
+
     # all_point_cnt = 5000
-    
+
     # all_point_cnt = 5000 if data_set['feature'].shape[0]>5000 else data_set['feature'].shape[0]
-    all_point_cnt = max(data_set['feature'].shape[0]//2,KINDS**2 * 2)
+    all_point_cnt = max(data_set['feature'].shape[0] // 2, KINDS ** 2 * 2)
     # all_point_cnt = 2000
 
     # NumTest = int(max(20,data_set['feature'].shape[0]//5000)) if all_point_cnt == 5000 else 1
@@ -149,11 +152,9 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     p_estimate[1] = torch.zeros(KINDS, KINDS)
     p_estimate[2] = torch.zeros(KINDS, KINDS, KINDS)
 
-
-
     for idx in range(NumTest):
         print(idx, flush=True)
-        logger.write(f"{idx+1}/{NumTest}\n")
+        logger.write(f"{idx + 1}/{NumTest}\n")
         logger.flush()
         # global
         sample = np.random.choice(range(data_set['feature'].shape[0]), all_point_cnt, replace=False)
@@ -177,12 +178,11 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     for j in range(3):
         p_estimate[j] = p_estimate[j] / NumTest
 
-    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'],logger, max_step, T0, p0, lr=lr)
+    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'], logger, max_step, T0, p0,
+                                                 lr=lr)
     P_calc = P_calc.view(-1).cpu().numpy()
     E_calc = E_calc.cpu().numpy()
     T_init = T_init.cpu().numpy()
-
-    
 
     # print("----Real value----------")
     # print(f'Real: P = {P_real},\n T = \n{np.round(np.array(T_real),3)}')
@@ -201,6 +201,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     # torch.save(rec_global, path)
     logger.flush()
     return E_calc, P_calc, T_init
+
 
 def count_knn_distribution(args, feat_cord, label, cluster_sum, k, norm='l2'):
     # feat_cord = torch.tensor(final_feat)
@@ -231,6 +232,7 @@ def count_knn_distribution(args, feat_cord, label, cluster_sum, k, norm='l2'):
     else:
         raise NameError('Undefined norm')
     return knn_labels_prob
+
 
 def get_score(knn_labels_cnt, label, k, method='cores', prior=None):  # method = ['cores', 'peer']
     # knn_labels_cnt: sampleSize * #class

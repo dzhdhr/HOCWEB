@@ -1,9 +1,8 @@
 import gzip
+import random
 
 import numpy as np
 import torch
-import random
-
 import torch.nn.functional as F
 
 from App.clip import clip

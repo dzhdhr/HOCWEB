@@ -58,6 +58,7 @@ def _download(url: str, root: str = os.path.expanduser("~/.cache/clip")):
 def _convert_RGB(image):
     return image.convert("RGB")
 
+
 def _transform(n_px):
     return Compose([
         Resize(n_px, interpolation=Image.BICUBIC),
