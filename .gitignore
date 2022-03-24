@@ -146,3 +146,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+*.csv
+log/b533a9f4-c47f-4031-81c7-f37671bd348a
+*.pt
+log/94ae7fd9-c1ed-447a-8aec-b1e167e5ae10
+*.npy
