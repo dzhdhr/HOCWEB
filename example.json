@@ -1,0 +1,13 @@
+{
+  "token": "aaaaa",
+  "featureFile": "X_train.npy",
+  "labelFile": "Y_train.npy",
+  "step": 1500,
+  "clip": true,
+  "matrixCalculated": true,
+  "hasMatrixLog": true,
+  "matrixLog": "ssssss",
+  "matrix": [[1,2,3],[1,2,3]],
+  "noisyLabelCalculated": true,
+  "noisyLabel": [1,2,3]
+}

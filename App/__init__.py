@@ -1,6 +1,6 @@
 from flask import Flask
 
-from App.controller import init_blueprint
+from App.controllers import init_blueprint
 from App.ext import init_ext
 from App.setting import envs
 
@@ -16,7 +16,5 @@ def create_app():
     app.config.from_object(envs.get('develop'))
     # init extensions
     init_ext(app=app)
-    # init blueprint
     init_blueprint(app=app)
-
     return app

@@ -43,7 +43,7 @@ def set_model_pre(config):
     return model, preprocess
 
 
-def init_feature_set(config, model_pre, train_dataloader, rnd, use_clip=True):
+def init_feature_set(config, model_pre, train_dataloader, rnd,result, use_clip=True):
     c1m_cluster_each = [0 for _ in range(config['num_classes'])]
 
     model_pre.eval()
@@ -55,10 +55,14 @@ def init_feature_set(config, model_pre, train_dataloader, rnd, use_clip=True):
     #     extracted_feature, _ = model_pre(feature)
     #     for i in range(extracted_feature.shape[0]):
     #         record[label[i]].append({'feature': extracted_feature[i].detach().cpu(), 'index': index[i]})
+    result.total_batch = len(list(enumerate(train_dataloader)))
+    result.to_file()
     for epoch in range(config['num_epoch']):
         print(f'Epoch {epoch}')
         # record = [[] for _ in range(config['num_classes'])]
         for i_batch, (feature, label, index) in enumerate(train_dataloader):
+            result.current_batch = i_batch+1
+            result.to_file()
             feature = feature.to(config['device'])
             label = label.to(config['device'])
             if use_clip:

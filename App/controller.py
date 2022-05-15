@@ -1,5 +1,4 @@
 import os
-import uuid
 
 import numpy as np
 import torch
@@ -8,6 +7,9 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 from App.SimRep import noniterate_detection
+from App.controllers.dectection_controller import detection_controller
+from App.controllers.estimation_controller import estimation_controller
+from App.controllers.log_controller import log_controller
 from App.hoc import get_T_P_global
 from App.numpy_dataloader import NumpyLoader
 from App.service import get_token
@@ -16,8 +18,6 @@ from App.util import set_device, set_model_pre, init_feature_set, build_T, build
 hoc_controller = Blueprint('hoc', __name__)
 
 
-def init_blueprint(app):
-    app.register_blueprint(blueprint=hoc_controller, url_prefix="")
 
 
 @hoc_controller.route("/getlog")

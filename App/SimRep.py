@@ -31,7 +31,7 @@ def data_transform(record, noise_or_not, sel_noisy):
     return data_set, noisy_prior / cnt
 
 
-def get_knn_acc_all_class(args, data_set, k=10, noise_prior=None, sel_noisy=None, thre_noise_rate=0.5, thre_true=None):
+def get_knn_acc_all_class(args, data_set, output,k=10, noise_prior=None, sel_noisy=None, thre_noise_rate=0.5, thre_true=None):
     # Build Feature Clusters --------------------------------------
     KINDS = args['num_classes']
 
@@ -54,12 +54,15 @@ def get_knn_acc_all_class(args, data_set, k=10, noise_prior=None, sel_noisy=None
     if args['method'] == 'mv':
         # test majority voting
         print(f'Use MV')
+        output.noisy_log = output.noisy_log+f'Use MV\n'
         label_pred = np.argmax(knn_labels_cnt, axis=1).reshape(-1)
         sel_noisy += (sel_idx[label_pred != noisy_label]).tolist()
     elif args['method'] == 'rank1':
         print(f'Use rank1')
         Tii_offset = args['Tii_offset']
         print(f'Tii offset is {Tii_offset}')
+        f'Tii offset is {Tii_offset}'
+        output.noisy_log = output.noisy_log + f'Use rank1'
         # fig=plt.figure(figsize=(15,4))
         for sel_class in range(KINDS):
             thre_noise_rate_per_class = 1 - min(args['Tii_offset'] * thre_noise_rate[sel_class][sel_class], 1.0)
@@ -78,7 +81,7 @@ def get_knn_acc_all_class(args, data_set, k=10, noise_prior=None, sel_noisy=None
     return sel_noisy
 
 
-def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
+def noniterate_detection(config, record, train_dataset,result, sel_noisy=[]):
     T_given_noisy_true = None
     T_given_noisy = None
 
@@ -88,34 +91,26 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     # print(data_set['noisy_label'])
     if config['method'] == 'rank1':
 
-        # print(f'T_init is {T_init}')
-        # T, p = get_T_global_min_new(config, data_set=data_set, max_step=config.max_iter if T_init is None else 20,
-        #                             lr=0.1 if T_init is None else 0.01, NumTest=config.G, T0=T_init, p0=p_init)
-
-        T = np.genfromtxt(config['T_path'], delimiter=',')
-        p = np.genfromtxt(config['P_path'], delimiter=',')
+        T = np.array(config['status'].T)
+        p = np.array(config['status'].p)
         print(T.shape)
         print(p.shape)
 
         T_given_noisy = T * p / noisy_prior
+
         print("T given noisy:")
         print(np.round(T_given_noisy, 2))
+        result.noisy_log = result.noisy_log+"T given noisy:\n"
+        result.noisy_log = result.noisy_log + str(np.round(T_given_noisy, 2))
         # add randomness
         for i in range(T.shape[0]):
             T_given_noisy[i][i] += np.random.uniform(low=-0.05, high=0.05)
 
     sel_noisy = get_knn_acc_all_class(config, data_set, k=config['k'], noise_prior=noisy_prior, sel_noisy=sel_noisy,
-                                      thre_noise_rate=T_given_noisy, thre_true=T_given_noisy_true)
+                                      thre_noise_rate=T_given_noisy, thre_true=T_given_noisy_true,output=result)
 
     sel_noisy = np.array(sel_noisy)
     sel_clean = np.array(list(set(data_set['index'].tolist()) ^ set(sel_noisy)))
 
-    # noisy_in_sel_noisy = np.sum(train_dataset.noise_or_not[sel_noisy]) / sel_noisy.shape[0]
-    # precision_noisy = noisy_in_sel_noisy
-    # recall_noisy = np.sum(train_dataset.noise_or_not[sel_noisy]) / np.sum(train_dataset.noise_or_not)
-
-    # print(f'[noisy] precision: {precision_noisy}')
-    # print(f'[noisy] recall: {recall_noisy}')
-    # print(f'[noisy] F1-score: {2.0 * precision_noisy * recall_noisy / (precision_noisy + recall_noisy)}')
 
     return sel_noisy, sel_clean, data_set['index']

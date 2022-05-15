@@ -1,7 +1,5 @@
 import time
 
-import torch.nn.functional as F
-
 from App.util import *
 
 
@@ -70,7 +68,7 @@ def func(KINDS, p_estimate, T_out, P_out, N, step, LOCAL, _device):
     return loss
 
 
-def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, p0=None, lr=0.1):
+def calc_func(KINDS, p_estimate, LOCAL, _device, logger,output, max_step=501, T0=None, p0=None, lr=0.1):
     # init
     # _device =  torch.device("cpu")
     N = KINDS
@@ -102,6 +100,7 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, 
 
     time1 = time.time()
     for step in range(max_step):
+        output.current_step = step+1
         if step:
             optimizer.zero_grad()
             loss.backward()
@@ -114,19 +113,26 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, logger, max_step=501, T0=None, 
         if step % 100 == 0:
             print('loss {}'.format(loss))
             logger.write('loss {}\n'.format(loss))
+            output.matrix_log = output.matrix_log +f'loss {loss}\n'
             print(f'step: {step}  time_cost: {time.time() - time1}')
             logger.write(f'step: {step}/{max_step - 1}  time_cost: {time.time() - time1}\n')
+            output.matrix_log = output.matrix_log+f'step: {step}/{max_step - 1}  time_cost: {time.time() - time1}\n'
+
             print(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}', flush=True)
             logger.write(f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}\n')
+            output.matrix_log = output.matrix_log + f'T {np.round(smt(T.cpu()).detach().numpy() * 100, 1)}\n'
+
             print(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}', flush=True)
             logger.write(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}\n')
+            output.matrix_log = output.matrix_log + f'P {np.round(smp(P.cpu().view(-1)).detach().numpy() * 100, 1)}\n'
+            output.to_file()
             logger.flush()
             time1 = time.time()
 
     return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach()
 
 
-def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None, p0=None, lr=0.1, ):
+def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None, p0=None, lr=0.1, status=None):
     global GLOBAL_T_REAL
     KINDS = config['num_classes']
     data_set = torch.load(f'{sub_noisy_dataset_name}', map_location=torch.device('cpu'))
@@ -142,7 +148,7 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
     # TODO: make the above parameters configurable
 
     print(f'Estimating global T. Sampling {all_point_cnt} examples each time')
-
+    status.matrix_log = status.matrix_log+f'Estimating global T. Sampling {all_point_cnt} examples each time'
     logger.write(f'Estimating high-order consensuses (numerically). Sampling {all_point_cnt} examples each time\n')
     logger.flush()
 
@@ -169,16 +175,16 @@ def get_T_P_global(config, sub_noisy_dataset_name, logger, max_step=501, T0=None
             #     torch.mean(p_real[i]))  # Assess the gap between estimation value and real value
         # print(p_estimate_rec[idx], flush=True)
         # logger.writelines(str(p_estimate_rec[idx])+"\n")
-
+    status.matrix_log = status.matrix_log+f'Estimating high-order consensuses (numerically) --- Done\n\nSolving equations:\n'
     logger.write(f'Estimating high-order consensuses (numerically) --- Done\n')
     logger.flush()
     logger.write(f'\n')
     logger.write(f'Solving equations:\n')
-
+    status.to_file()
     for j in range(3):
         p_estimate[j] = p_estimate[j] / NumTest
 
-    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'], logger, max_step, T0, p0,
+    loss_min, E_calc, P_calc, T_init = calc_func(KINDS, p_estimate, False, config['device'], logger,status, max_step, T0, p0,
                                                  lr=lr)
     P_calc = P_calc.view(-1).cpu().numpy()
     E_calc = E_calc.cpu().numpy()
