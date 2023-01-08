@@ -39,7 +39,7 @@ def set_device():
 def set_model_pre(config):
     # use resnet50 for ImageNet pretrain (PyTorch official pre-trained model)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, preprocess = clip.load('ViT-B/32', device)  # RN50, RN101, RN50x4, ViT-B/32
+    model, preprocess = clip.load('ViT-B/32', device, jit=False)  # RN50, RN101, RN50x4, ViT-B/32
     return model, preprocess
 
 
