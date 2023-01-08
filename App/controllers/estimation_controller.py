@@ -25,7 +25,9 @@ def calculate():
 
     output = status(token,None,None,step,use_clip)
     output.from_file(token)
-    output.step =step
+    use_clip = output.use_clip
+    print(use_clip)
+    output.step = step
     output.use_clip = use_clip
     result_path = os.path.join(os.getcwd(), current_app.config['UPLOAD_FOLDER'], token, token + ".json")
     output.to_file()

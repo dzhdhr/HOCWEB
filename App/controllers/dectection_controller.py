@@ -44,7 +44,10 @@ def checkresultnoise():
 def calculate_noise():
     sel_noisy_rec = []
     token = request.args.get('token')
+    result_status = status(token, None, None)
+
     use_clip = False
+
     temp_path_1 = os.path.join(os.getcwd(), current_app.config['UPLOAD_FOLDER'], token, 'feature')
     f_list = os.listdir(temp_path_1)
     feature_path = os.path.join(temp_path_1, f_list[0])
@@ -53,6 +56,8 @@ def calculate_noise():
     label_path = os.path.join(temp_path_2, f_list_2[0])
     output = status(label_file=None, feature_file=f_list[0], use_clip=use_clip, token=token)
     output.from_file(token=token)
+    use_clip = output.use_clip
+    print(use_clip)
     config = {
         'status':output,
         'pre_type': "image",
