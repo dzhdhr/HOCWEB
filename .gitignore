@@ -146,12 +146,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-log/16b16d1a-c7bd-46f3-be9e-399d1f0b76c6
-upload/16b16d1a-c7bd-46f3-be9e-399d1f0b76c6/16b16d1a-c7bd-46f3-be9e-399d1f0b76c6.json
-upload/16b16d1a-c7bd-46f3-be9e-399d1f0b76c6/feature/X_train.npy
-upload/16b16d1a-c7bd-46f3-be9e-399d1f0b76c6/label/y_train.npy
-upload/fabd9d84-2cf9-42ac-9db2-c454cfef16ac/fabd9d84-2cf9-42ac-9db2-c454cfef16ac.json
-upload/fabd9d84-2cf9-42ac-9db2-c454cfef16ac/feature/X_train.npy
-upload/fabd9d84-2cf9-42ac-9db2-c454cfef16ac/label/y_train.npy
-data/image__clean.pt
-data/image__noisy.pt
+log/*
+upload/*
+data/*
+data/*

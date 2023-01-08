@@ -2,7 +2,7 @@ import PIL
 import numpy as np
 from torch.utils.data import dataset
 import torch
-import clip
+import App.clip as clip
 from torchvision.transforms import transforms
 
 
@@ -31,21 +31,23 @@ class NumpyLoader(dataset.Dataset):
         self.noise_or_not = None
         self.label = np.int8(np.load(label_path))
         
-
-        if len(self.instances[0].shape) == 3 and self.instances[0].shape[2] == 3:
-            self.pre_process = pre_process
-        elif len(self.instances[0].shape) == 3 and self.instances[0].shape[2] == 1:
-            self.instances = np.repeat(self.instances, 3, axis=2)
-            self.pre_process = pre_process
-        elif len(self.instances[0].shape) == 2:
-            self.instances = np.expand_dims(self.instances, axis = 2)
-            self.instances = np.repeat(self.instances, 3, axis=2)
-            self.pre_process = pre_process
-        elif isinstance(self.instances[0], str):
-            self.instances = [clip.tokenize(i) for i in self.instances]
-            self.pre_process = pre_process
-        else:
-            self.pre_process = None
+        print(self.instances[0])
+        if pre_process is not None:
+            if len(self.instances[0].shape) == 3 and self.instances[0].shape[2] == 3:
+                self.pre_process = pre_process
+            elif len(self.instances[0].shape) == 3 and self.instances[0].shape[2] == 1:
+                self.instances = np.repeat(self.instances, 3, axis=2)
+                self.pre_process = pre_process
+            elif len(self.instances[0].shape) == 2:
+                self.instances = np.expand_dims(self.instances, axis = 2)
+                self.instances = np.repeat(self.instances, 3, axis=2)
+                self.pre_process = pre_process
+            elif isinstance(self.instances[0], str):
+                self.instances = [clip.tokenize(i) for i in self.instances]
+                self.pre_process = pre_process
+            else:
+                self.pre_process = None
+        print(f'pre process is None? {self.pre_process is None}')
 
     def __len__(self):
         return len(self.label)
