@@ -116,12 +116,15 @@ def calculate():
         "num_epoch": 1
     }
     model_pre, pre_process = set_model_pre(config)
-    if not use_clip:
-        pre_process = None
+    
     train = NumpyLoader(label_path=label_path, feature_path=feature_path, pre_process=pre_process)
     config['num_classes'] = train.unique_class()
     config['P'] = [1.0 / config['num_classes']] * config['num_classes']  # Distribution of 10 clusters
     config['T'] = build_T(config['num_classes'])
+    if not use_clip:
+        pre_process = None
+
+         
 
     train_dataloader_EF = torch.utils.data.DataLoader(train,
                                                       batch_size=64,
