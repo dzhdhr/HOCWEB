@@ -12,6 +12,8 @@ file_controller = Blueprint('file', __name__)
 
 @file_controller.route("/upload", methods=['POST'])
 def uploadfile():
+    use_clip = request.form.get('useClip')=='true'
+    print(use_clip)
     token = request.form.get('token')
     print(token)
     if token is None:
@@ -31,7 +33,7 @@ def uploadfile():
     f.save(file_path)
 
     result_path = os.path.join(os.getcwd(), current_app.config['UPLOAD_FOLDER'], token, token + ".json")
-    result_file = status(token, None, None)
+    result_file = status(token, None, None,step=1500, use_clip=use_clip)
 
     result_file.from_file(token)
     if type == "feature":
@@ -39,6 +41,7 @@ def uploadfile():
         result_file.feature_file = secure_filename(f.filename)
     else:
         result_file.label_file = secure_filename(f.filename)
+    result_file.use_clip = use_clip
     result_file.to_file()
 
     return {"token": token}

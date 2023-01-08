@@ -1,7 +1,10 @@
+import PIL
 import numpy as np
 from torch.utils.data import dataset
 import torch
 import clip
+from torchvision.transforms import transforms
+
 
 class NumpyLoader(dataset.Dataset):
     def __getitem__(self, index):
@@ -10,6 +13,18 @@ class NumpyLoader(dataset.Dataset):
         if self.pre_process == None:
             return instance, label, index
         return self.pre_process(instance), label, index
+        # if self.pre_process is None:
+        #     return img, label, index
+
+        # # torch_tensor = transforms.ToPILImage(torch_tensor)
+        # to_img = PIL.Image.fromarray(img)
+
+
+        # self.pre_process(to_img)
+        # transform = transforms.Compose([transforms.PILToTensor()])
+        # tensor = transform(to_img)
+
+        # return tensor, label, index
 
     def __init__(self, label_path, feature_path, pre_process):
         self.instances = np.load(feature_path)
